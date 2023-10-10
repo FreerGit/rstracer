@@ -23,6 +23,18 @@ impl Vec3 {
             ],
         }
     }
+
+    pub fn length(self) -> f32 {
+        self.length_squared().sqrt()
+    }
+
+    pub fn length_squared(self) -> f32 {
+        self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
+    }
+
+    pub fn unit_vector(u: Vec3) -> Vec3 {
+        u / u.length()
+    }
 }
 
 impl ops::Add for Vec3 {
@@ -97,6 +109,10 @@ mod test {
         Vec3::new(0., 0., 0.)
     }
 
+    fn ones() -> Vec3 {
+        Vec3::new(1., 1., 1.)
+    }
+
     #[test]
     fn add() {
         assert_eq!(vec_zero() + vec_zero(), vec_zero());
@@ -143,7 +159,13 @@ mod test {
         let ans = Vec3::new(-15., -2., 39.);
         assert_eq!(Vec3::cross(u, v), ans);
         assert_eq!(Vec3::cross(vec_zero(), vec_zero()), vec_zero());
-        let ones = Vec3::new(1., 1., 1.);
-        assert_eq!(Vec3::cross(ones, ones), vec_zero());
+        assert_eq!(Vec3::cross(ones(), ones()), vec_zero());
+    }
+
+    #[test]
+    fn unit_vector() {
+        let x = 1.0 / (3 as f32).sqrt();
+        let unit = Vec3::new(x, x, x);
+        assert_eq!(Vec3::unit_vector(ones()), unit);
     }
 }
