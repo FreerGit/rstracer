@@ -3,7 +3,19 @@ use rstracer::domain::{ray::Ray, vec3::Vec3};
 use std::fs::File;
 use std::io::Write;
 
+fn hit_sphere(center: Vec3, radius: f32, r: Ray) -> bool {
+    let oc = r.origin() - center;
+    let a = Vec3::dot(r.direction(), r.direction());
+    let b = Vec3::dot(oc, r.direction()) * 2.0;
+    let c = Vec3::dot(oc, oc) - radius * radius;
+    let discriminant = b * b - a * c * 4.;
+    discriminant >= 0.
+}
+
 fn ray_color(r: Ray) -> Vec3 {
+    if hit_sphere(Vec3::new(0., 0., -1.), 0.5, r) {
+        return Vec3::new(1., 0., 0.);
+    }
     let unit_direction = Vec3::unit_vector(r.direction());
     let a = (unit_direction.y() + 1.0) * 0.5;
     Vec3::new(1., 1., 1.) * (1.0 - a) + Vec3::new(0.5, 0.7, 1.) * a
@@ -40,8 +52,8 @@ fn main() {
     ppm_file.push_str(&setup_ppm.to_string());
 
     // Render
-    for i in 0..(image_height as i32) - 1 {
-        for j in 0..(image_width as i32) - 1 {
+    for i in 0..(image_height as i32) {
+        for j in 0..(image_width as i32) {
             let pixel_center = pixel00_loc + (pixel_delta_u * j) + (pixel_delta_v * i);
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
@@ -49,7 +61,9 @@ fn main() {
             ppm_file.push_str(&format!("{}", write_color(pixel_color)).to_string());
         }
     }
-    let mut file = File::open("../images/test.ppm").expect("unable to read file");
+
+    let mut file = File::create("./images/test.ppm").expect("unable to read file");
+    println!("{:#?}", std::env::current_dir());
     file.write(ppm_file.as_bytes())
         .expect("unable to write to file");
 }
