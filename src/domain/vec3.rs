@@ -13,6 +13,16 @@ impl Vec3 {
     pub fn dot(u: Vec3, v: Vec3) -> f32 {
         u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
     }
+
+    pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
+        Vec3 {
+            e: [
+                u.e[1] * v.e[2] - u.e[2] * v.e[1],
+                u.e[2] * v.e[0] - u.e[0] * v.e[2],
+                u.e[0] * v.e[1] - u.e[1] * v.e[0],
+            ],
+        }
+    }
 }
 
 impl ops::Add for Vec3 {
@@ -124,5 +134,16 @@ mod test {
         let b = Vec3::new(4., -5., 6.);
         assert_eq!(Vec3::dot(a, b), 12.);
         assert_eq!(Vec3::dot(vec_zero(), inc()), 0.);
+    }
+
+    #[test]
+    fn cross() {
+        let u = Vec3::new(3., -3., 1.);
+        let v = Vec3::new(4., 9., 2.);
+        let ans = Vec3::new(-15., -2., 39.);
+        assert_eq!(Vec3::cross(u, v), ans);
+        assert_eq!(Vec3::cross(vec_zero(), vec_zero()), vec_zero());
+        let ones = Vec3::new(1., 1., 1.);
+        assert_eq!(Vec3::cross(ones, ones), vec_zero());
     }
 }
