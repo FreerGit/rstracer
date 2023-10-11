@@ -123,6 +123,14 @@ impl ops::Div<f32> for Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Vec3 {
+        self * -1
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Vec3;
@@ -193,5 +201,14 @@ mod test {
         let x = 1.0 / (3 as f32).sqrt();
         let unit = Vec3::new(x, x, x);
         assert_eq!(Vec3::unit_vector(ones()), unit);
+    }
+
+    #[test]
+    fn neg() {
+        assert_eq!(-vec_zero(), vec_zero());
+        assert_eq!(-ones(), Vec3::new(-1., -1., -1.));
+        assert_eq!(-inc(), Vec3::new(-1., -2., -3.));
+        assert_eq!(-inc(), -inc());
+        assert_eq!(-Vec3::new(-1., -5., 4.), Vec3::new(1., 5., -4.));
     }
 }
