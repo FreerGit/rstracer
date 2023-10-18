@@ -1,4 +1,4 @@
-use super::{ray::Ray, vec3::Vec3};
+use super::{interval::Interval, ray::Ray, vec3::Vec3};
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct Hit {
@@ -19,5 +19,5 @@ impl Hit {
 }
 
 pub trait Hittable {
-    fn hit(&self, r: Ray, tmin: f32, tmax: f32, hit_record: &mut Hit) -> bool;
+    fn hit(&self, r: Ray, ray_t: Interval, hit_record: &mut Hit) -> bool;
 }

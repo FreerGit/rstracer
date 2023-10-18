@@ -3,6 +3,7 @@ use rstracer::domain::color::write_color;
 use rstracer::domain::constants::INFINITY;
 use rstracer::domain::hittable::{Hit, Hittable};
 use rstracer::domain::hittable_list::HittableList;
+use rstracer::domain::interval::Interval;
 use rstracer::domain::sphere::Sphere;
 use rstracer::domain::{ray::Ray, vec3::Vec3};
 use std::fs::File;
@@ -10,7 +11,7 @@ use std::io::Write;
 
 fn ray_color(r: Ray, world: &dyn Hittable) -> Vec3 {
     let mut hit = Hit::default();
-    if world.hit(r, 0., INFINITY, &mut hit) {
+    if world.hit(r, Interval::new(0., INFINITY), &mut hit) {
         return (hit.normal + Vec3::new(1., 1., 1.)) * 0.5;
     }
 
