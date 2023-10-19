@@ -2,7 +2,6 @@ use super::{
     hittable::{Hit, Hittable},
     interval::Interval,
     ray::Ray,
-    vec3::Vec3,
 };
 
 pub struct HittableList {
