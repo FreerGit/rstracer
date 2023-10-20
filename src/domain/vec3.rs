@@ -1,5 +1,7 @@
 use std::ops;
 
+use super::utils::{random_f32, random_f32_custom};
+
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Vec3 {
     e: [f32; 3],
@@ -46,6 +48,40 @@ impl Vec3 {
 
     pub fn unit_vector(u: Vec3) -> Vec3 {
         u / u.length()
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3::new(random_f32(), random_f32(), random_f32())
+    }
+
+    pub fn random_custom(min: f32, max: f32) -> Vec3 {
+        Vec3::new(
+            random_f32_custom(min, max),
+            random_f32_custom(min, max),
+            random_f32_custom(min, max),
+        )
+    }
+
+    fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let p = Self::random_custom(-1., 1.);
+            if p.length_squared() < 1. {
+                return p;
+            }
+        }
+    }
+
+    fn random_unit_vector() -> Vec3 {
+        Self::unit_vector(Self::random_in_unit_sphere())
+    }
+
+    pub fn random_on_hemisphere(normal: Vec3) -> Vec3 {
+        let on_unit_sphere = Self::random_unit_vector();
+        if Vec3::dot(on_unit_sphere, normal) > 0. {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
     }
 }
 
