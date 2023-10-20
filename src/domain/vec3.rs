@@ -131,6 +131,12 @@ impl ops::Neg for Vec3 {
     }
 }
 
+impl ops::AddAssign for Vec3 {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::Vec3;
@@ -210,5 +216,17 @@ mod test {
         assert_eq!(-inc(), Vec3::new(-1., -2., -3.));
         assert_eq!(-inc(), -inc());
         assert_eq!(-Vec3::new(-1., -5., 4.), Vec3::new(1., 5., -4.));
+    }
+
+    #[test]
+    fn add_assign() {
+        let mut zeroes = Vec3::default();
+        assert_eq!(vec_zero(), vec_zero());
+        zeroes += ones();
+        assert_eq!(vec_zero() + ones(), zeroes);
+        zeroes += ones();
+        assert_eq!(ones() + ones(), Vec3::new(2., 2., 2.));
+
+        // assert_eq!(inc() + inc(), Vec3::new(2., 4., 6.,));
     }
 }

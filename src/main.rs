@@ -11,5 +11,8 @@ fn main() {
 
     let aspect_ratio = 16. / 9.;
     let image_width = 400;
-    Camera::render(image_width, aspect_ratio, &world);
+    let sample_per_pixel = 100;
+    let cam = Camera::new(aspect_ratio, image_width, sample_per_pixel);
+
+    Camera::render(&cam, &world);
 }
