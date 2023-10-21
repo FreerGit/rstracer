@@ -71,7 +71,7 @@ impl Vec3 {
         }
     }
 
-    fn random_unit_vector() -> Vec3 {
+    pub fn random_unit_vector() -> Vec3 {
         Self::unit_vector(Self::random_in_unit_sphere())
     }
 

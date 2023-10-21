@@ -14,6 +14,7 @@ pub struct Camera {
     pub aspect_ratio: f32,
     pub image_width: i32,
     pub samples_per_pixel: i32,
+    pub max_depth: i32,
     image_height: i32,
     center: Vec3,
     pixel00_loc: Vec3,
@@ -22,8 +23,8 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(ar: f32, iw: i32, spp: i32) -> Self {
-        let mut s = Self::initialize(iw, ar);
+    pub fn new(ar: f32, iw: i32, spp: i32, md: i32) -> Self {
+        let mut s = Self::initialize(iw, ar, md);
         s.samples_per_pixel = spp;
         s
     }
@@ -43,7 +44,7 @@ impl Camera {
                 let mut pixel_color = Vec3::new(0., 0., 0.);
                 for _samples in 0..self.samples_per_pixel {
                     let r = self.get_ray(j as f32, i as f32);
-                    pixel_color += Self::ray_color(r, world);
+                    pixel_color += Self::ray_color(r, self.max_depth, world);
                 }
                 ppm_file.push_str(&write_color(pixel_color, self.samples_per_pixel));
             }
@@ -54,7 +55,7 @@ impl Camera {
             .expect("unable to write to file");
     }
 
-    fn initialize(width: i32, aspect_ratio: f32) -> Self {
+    fn initialize(width: i32, aspect_ratio: f32, max_depth: i32) -> Self {
         let image_width = width;
         let aspect_ratio = aspect_ratio;
         let samples_per_pixel = 10;
@@ -80,6 +81,7 @@ impl Camera {
             image_width,
             aspect_ratio,
             samples_per_pixel,
+            max_depth,
             image_height,
             center: camera_center,
             pixel_delta_u,
@@ -102,11 +104,16 @@ impl Camera {
         (self.pixel_delta_u * px) + (self.pixel_delta_v * py)
     }
 
-    fn ray_color(ray: Ray, world: &dyn Hittable) -> Vec3 {
+    fn ray_color(ray: Ray, max_depth: i32, world: &dyn Hittable) -> Vec3 {
         let mut hit = Hit::default();
+
+        if max_depth <= 0 {
+            return Vec3::new(0., 0., 0.);
+        }
+
         if world.hit(ray, Interval::new(0.001, INFINITY), &mut hit) {
-            let direction = Vec3::random_on_hemisphere(hit.normal);
-            return Self::ray_color(Ray::new(hit.p, direction), world) * 0.5;
+            let direction = hit.normal + Vec3::random_unit_vector();
+            return Self::ray_color(Ray::new(hit.p, direction), max_depth - 1, world) * 0.1;
         }
 
         let unit_direction = Vec3::unit_vector(ray.direction());
