@@ -103,10 +103,13 @@ impl Camera {
     }
 
     fn ray_color(ray: Ray, world: &dyn Hittable) -> Vec3 {
-        let mut hit = Hit::default();
-        if world.hit(ray, Interval::new(0.001, INFINITY), &mut hit) {
-            let direction = Vec3::random_on_hemisphere(hit.normal);
-            return Self::ray_color(Ray::new(hit.p, direction), world) * 0.5;
+        if let Some(h) = world.hit(&ray, &Interval::new(0.001, INFINITY)) {
+            if let Some((att, scatt)) = h.material.scatter(&ray, &h) {
+                return att * Self::ray_color(scatt, depth - 1, world);
+            }
+
+            let direction = Vec3::random_on_hemisphere(Vec3::default());
+            return Self::ray_color(Ray::new(Vec3::default(), direction), world) * 0.5;
         }
 
         let unit_direction = Vec3::unit_vector(ray.direction());

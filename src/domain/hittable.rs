@@ -1,23 +1,21 @@
-use super::{interval::Interval, ray::Ray, vec3::Vec3};
+use super::{interval::Interval, material::Material, ray::Ray, vec3::Vec3};
 
-#[derive(Default, Copy, Clone, Debug)]
-pub struct Hit {
+pub struct Hit<'a> {
     pub p: Vec3,
     pub normal: Vec3,
     pub t: f32,
-    pub front_face: bool,
+    pub material: &'a dyn Material,
 }
 
-impl Hit {
-    pub fn set_face_normal(&mut self, r: Ray, outward_normal: Vec3) -> () {
-        self.front_face = Vec3::dot(r.direction(), outward_normal) < 0.;
-        match self.front_face {
-            true => self.normal = outward_normal,
-            false => self.normal = -outward_normal,
+impl<'a> Hit<'a> {
+    pub fn get_face_normal(r: Ray, outward_normal: Vec3) -> Vec3 {
+        match Vec3::dot(r.direction(), outward_normal) < 0. {
+            true => outward_normal,
+            false => -outward_normal,
         }
     }
 }
 
 pub trait Hittable {
-    fn hit(&self, r: Ray, ray_t: Interval, hit_record: &mut Hit) -> bool;
+    fn hit(&self, ray: &Ray, interval: &Interval) -> Option<Hit>;
 }
