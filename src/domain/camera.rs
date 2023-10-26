@@ -1,19 +1,15 @@
 use std::{fs::File, io::Write};
 
 use super::{
-    color::write_color,
-    hittable::{Hit, Hittable},
-    interval::Interval,
-    ray::Ray,
-    utils::random_f32,
-    utils::INFINITY,
-    vec3::Vec3,
+    color::write_color, hittable::Hittable, interval::Interval, ray::Ray, utils::random_f32,
+    utils::INFINITY, vec3::Vec3,
 };
 
 pub struct Camera {
     pub aspect_ratio: f32,
     pub image_width: i32,
     pub samples_per_pixel: i32,
+    pub max_depth: i32,
     image_height: i32,
     center: Vec3,
     pixel00_loc: Vec3,
@@ -22,8 +18,8 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(ar: f32, iw: i32, spp: i32) -> Self {
-        let mut s = Self::initialize(iw, ar);
+    pub fn new(ar: f32, iw: i32, spp: i32, md: i32) -> Self {
+        let mut s = Self::initialize(iw, ar, md);
         s.samples_per_pixel = spp;
         s
     }
@@ -43,7 +39,7 @@ impl Camera {
                 let mut pixel_color = Vec3::new(0., 0., 0.);
                 for _samples in 0..self.samples_per_pixel {
                     let r = self.get_ray(j as f32, i as f32);
-                    pixel_color += Self::ray_color(r, world);
+                    pixel_color += Self::ray_color(r, self.max_depth, world);
                 }
                 ppm_file.push_str(&write_color(pixel_color, self.samples_per_pixel));
             }
@@ -54,7 +50,7 @@ impl Camera {
             .expect("unable to write to file");
     }
 
-    fn initialize(width: i32, aspect_ratio: f32) -> Self {
+    fn initialize(width: i32, aspect_ratio: f32, max_depth: i32) -> Self {
         let image_width = width;
         let aspect_ratio = aspect_ratio;
         let samples_per_pixel = 10;
@@ -80,6 +76,7 @@ impl Camera {
             image_width,
             aspect_ratio,
             samples_per_pixel,
+            max_depth,
             image_height,
             center: camera_center,
             pixel_delta_u,
@@ -102,14 +99,16 @@ impl Camera {
         (self.pixel_delta_u * px) + (self.pixel_delta_v * py)
     }
 
-    fn ray_color(ray: Ray, world: &dyn Hittable) -> Vec3 {
+    fn ray_color(ray: Ray, max_depth: i32, world: &dyn Hittable) -> Vec3 {
+        if max_depth <= 0 {
+            return Vec3::new(0., 0., 0.);
+        }
+
         if let Some(h) = world.hit(&ray, &Interval::new(0.001, INFINITY)) {
             if let Some((att, scatt)) = h.material.scatter(&ray, &h) {
-                return att * Self::ray_color(scatt, depth - 1, world);
+                return att * Self::ray_color(scatt, max_depth - 1, world);
             }
-
-            let direction = Vec3::random_on_hemisphere(Vec3::default());
-            return Self::ray_color(Ray::new(Vec3::default(), direction), world) * 0.5;
+            return Vec3::new(0., 0., 0.);
         }
 
         let unit_direction = Vec3::unit_vector(ray.direction());
