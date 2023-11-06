@@ -44,13 +44,15 @@ impl<M: Material> Hittable for Sphere<M> {
         let t = root;
         let p = r.at(t);
         let outward_normal = (p - self.center) / self.radius;
-        let normal = Hit::get_face_normal(*r, outward_normal);
 
-        Some(Hit {
+        let mut hit = Hit {
             p,
-            normal,
+            normal: Vec3::new(0., 0., 0.),
             t,
             material: &self.material,
-        })
+            front_face: false,
+        };
+        hit.set_face_normal(r, outward_normal);
+        Some(hit)
     }
 }

@@ -24,8 +24,8 @@ impl Vec3 {
         self.e[2]
     }
 
-    pub fn dot(u: Vec3, v: Vec3) -> f32 {
-        u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
+    pub fn dot(self, v: Vec3) -> f32 {
+        self.e[0] * v.e[0] + self.e[1] * v.e[1] + self.e[2] * v.e[2]
     }
 
     pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
@@ -67,7 +67,7 @@ impl Vec3 {
         )
     }
 
-    fn random_in_unit_sphere() -> Vec3 {
+    pub fn random_in_unit_sphere() -> Vec3 {
         loop {
             let p = Self::random_custom(-1., 1.);
             if p.length_squared() < 1. {
@@ -91,6 +91,13 @@ impl Vec3 {
 
     pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
         v - n * 2 * Vec3::dot(v, n)
+    }
+
+    pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f32) -> Vec3 {
+        let cos_theta = f32::min(Vec3::dot(-uv, n), 1.0);
+        let r_out_perp = (uv + n * cos_theta) * etai_over_etat;
+        let r_out_parallel = n * -f32::abs(1.0 - r_out_perp.length_squared()).sqrt();
+        r_out_perp + r_out_parallel
     }
 }
 

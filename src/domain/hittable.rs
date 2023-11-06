@@ -5,14 +5,17 @@ pub struct Hit<'a> {
     pub normal: Vec3,
     pub t: f32,
     pub material: &'a dyn Material,
+    pub front_face: bool,
 }
 
 impl<'a> Hit<'a> {
-    pub fn get_face_normal(r: Ray, outward_normal: Vec3) -> Vec3 {
-        match Vec3::dot(r.direction(), outward_normal) < 0. {
-            true => outward_normal,
-            false => -outward_normal,
-        }
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) -> () {
+        self.front_face = r.direction().dot(outward_normal) < 0.0;
+        self.normal = if self.front_face {
+            outward_normal
+        } else {
+            -outward_normal
+        };
     }
 }
 
