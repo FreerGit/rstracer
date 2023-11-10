@@ -1,8 +1,13 @@
 use std::{fs::File, io::Write};
 
 use super::{
-    color::write_color, hittable::Hittable, interval::Interval, ray::Ray, utils::random_f32,
-    utils::INFINITY, vec3::Vec3,
+    color::write_color,
+    hittable::Hittable,
+    interval::Interval,
+    ray::Ray,
+    utils::INFINITY,
+    utils::{degrees_to_radians, random_f32},
+    vec3::Vec3,
 };
 
 pub struct Camera {
@@ -10,6 +15,7 @@ pub struct Camera {
     pub image_width: i32,
     pub samples_per_pixel: i32,
     pub max_depth: i32,
+    pub vfov: i32,
     image_height: i32,
     center: Vec3,
     pixel00_loc: Vec3,
@@ -56,7 +62,10 @@ impl Camera {
         let samples_per_pixel = 10;
         let image_height = image_width / aspect_ratio as i32;
         let focal_length = 1.;
-        let viewport_height = 2.;
+        let vfov = 90.;
+        let theta = degrees_to_radians(vfov);
+        let h = (theta / 2.).tan();
+        let viewport_height = 2. * h * focal_length;
         let viewport_width = viewport_height * ((image_width) / image_height) as f32;
         let camera_center = Vec3::new(0., 0., 0.);
 
@@ -77,6 +86,7 @@ impl Camera {
             aspect_ratio,
             samples_per_pixel,
             max_depth,
+            vfov: (vfov as i32),
             image_height,
             center: camera_center,
             pixel_delta_u,

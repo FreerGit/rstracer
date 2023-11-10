@@ -2,43 +2,19 @@ use rstracer::domain::camera::Camera;
 use rstracer::domain::hittable_list::HittableList;
 use rstracer::domain::material::{Dialectric, Lambertian, Metal};
 use rstracer::domain::sphere::Sphere;
+use rstracer::domain::utils::PI;
 use rstracer::domain::vec3::Vec3;
 
 fn main() {
     // World
     let mut world = HittableList::new();
 
-    let mat_ground = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-    let mat_center = Lambertian::new(Vec3::new(0.1, 0.2, 0.5));
-    let mat_left = Dialectric::new(1.5);
-    let mat_right = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
+    let r = (PI / 4.).cos();
+    let left = Lambertian::new(Vec3::new(0., 0., 1.));
+    let right = Lambertian::new(Vec3::new(1., 0., 0.));
 
-    world.push(Box::new(Sphere::new(
-        Vec3::new(0., 0., -1.),
-        0.5,
-        mat_center,
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(-1., 0., -1.),
-        0.5,
-        mat_left.clone(),
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(-1., 0., -1.),
-        -0.4,
-        mat_left,
-    )));
-
-    world.push(Box::new(Sphere::new(
-        Vec3::new(1., 0., -1.),
-        0.5,
-        mat_right,
-    )));
-    world.push(Box::new(Sphere::new(
-        Vec3::new(0., -100.5, -1.),
-        100.,
-        mat_ground,
-    )));
+    world.push(Box::new(Sphere::new(Vec3::new(-r, 0., -1.), r, left)));
+    world.push(Box::new(Sphere::new(Vec3::new(r, 0., -1.), r, right)));
 
     let aspect_ratio = 16. / 9.;
     let image_width = 400;
